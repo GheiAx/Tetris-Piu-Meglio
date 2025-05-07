@@ -1,4 +1,3 @@
-# Tetris-Piu-Meglio
 
 Tetris in Python con Pygame
 
