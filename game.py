@@ -37,16 +37,18 @@ SHAPES = [
 LEVEL_LINE_GOAL = 10 
 MAX_LEVEL = 15
 
-
 class Piece:
     def __init__(self, shape=None):
         self.shape = shape or random.choice(SHAPES)
         self.color = random.choice(COLORS)
         self.x = COLUMNS // 2 - len(self.shape[0]) // 2
+        #COLUMNS//2 trova la colonna centrale del campo, len(self.shape[0]) // 2 trova la metà della larghezza del pezzo.
         self.y = 0
 
     def rotate(self):
         self.shape = [list(row) for row in zip(*self.shape[::-1])]
+        #per ruotare una matrice 2D (un pezzo del gioco) di 90° in senso orario, 
+        #aggiornando self.shape trasformandola in una nuova lista di liste, che rappresenta la figura ruotata.
 
 
 def check_collision(grid, piece, offset_x=0, offset_y=0):
@@ -55,7 +57,11 @@ def check_collision(grid, piece, offset_x=0, offset_y=0):
             if cell:
                 nx = piece.x + x + offset_x
                 ny = piece.y + y + offset_y
+                #x,y sono la posizione della cella e piece.x/y del pezzo
                 if nx < 0 or nx >= COLUMNS or ny >= ROWS or (ny >= 0 and grid[ny][nx]):
+                    #nx < 0 or nx >= COLUMNS se la cella va fuori dai bordi orizzontali
+                    #ny >= ROWS se la cella scende oltre il fondo
+                    #ny >= 0 and grid[ny][nx] se anche una sola cella del pezzo collide (con bordi o altre celle)
                     return True
     return False
 
@@ -82,9 +88,12 @@ def draw_grid(surface, grid):
         for x, cell in enumerate(row):
             if cell:
                 pygame.draw.rect(surface, cell, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+                ##La dimensione è GRID_SIZE × GRID_SIZE
                 pygame.draw.rect(surface, BLACK, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+                #Disegna un bordo nero spesso 2 pixel sopra il rettangolo precedente
             else:
                 pygame.draw.rect(surface, GRAY, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+                #Disegna solo un bordo grigio sottile (1 pixel) per celle vuote
 
 
 def draw_piece(surface, piece):
@@ -93,8 +102,15 @@ def draw_piece(surface, piece):
             if cell:
                 pygame.draw.rect(surface, piece.color,
                                  ((piece.x + x) * GRID_SIZE, (piece.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+                                #surface: dove viene disegnata la cella
+                                #piece.x + x: posizione orizzontale del blocco sul campo
+                                #piece.y + y: posizione verticale.
+                                #Queste vengono moltiplicate per GRID_SIZE per convertire da coordinate di griglia a pixel sullo schermo. 
                 pygame.draw.rect(surface, BLACK,
                                  ((piece.x + x) * GRID_SIZE, (piece.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+                                 #Stesse coordinate e dimensioni di prima.
+                                #Disegna un bordo nero spesso 2 pixel attorno alla cella colorata.
+                                #Serve per evidenziare i contorni del pezzo e renderlo più visibile sul campo.
 
 
 def draw_next_pieces(surface, next_pieces):
@@ -117,6 +133,8 @@ def game_over_animation(surface):
     pygame.mixer.music.stop()
     pygame.mixer.Sound("gameover.mp3").play()
     for i in range(255, 0, -5):
+        #Riempie tutto lo surface con un colore rosso con intensità i.
+        #Man mano che i diminuisce, il rosso si scurisce
         surface.fill((i, 0, 0))
         draw_text(surface, "GAME OVER", (WIDTH // 4, HEIGHT // 2), 50, WHITE)
         pygame.display.flip()
@@ -135,7 +153,7 @@ def calculate_score(lines):
         return 300
     elif lines == 3:
         return 500
-    elif lines == 4:
+    elif lines >= 4:
         return 800
     return 0
 
